@@ -1,4 +1,4 @@
-# movie-converter
+# mov2mp4
 
 [English](README.md)
 
@@ -15,19 +15,19 @@ Docker でも実行できます（Ubuntu ベース）:
 
 ```bash
 # イメージをビルド
-docker build -t movie-converter .
+docker build -t mov2mp4 .
 ```
 
 ディレクトリを変換（出力は `outputs/` に統一。gitignore 対象）:
 
 ```bash
-docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" movie-converter /input /output
+docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 /input /output
 ```
 
 オプション付き:
 
 ```bash
-docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" movie-converter -m fast /input /output
+docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 -m fast /input /output
 ```
 
 ## 使い方
@@ -110,7 +110,7 @@ fast モードで変換:
 Docker でテスト:
 
 ```bash
-docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" movie-converter /input /output
+docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mov2mp4 /input /output
 ```
 
 単一ファイル:

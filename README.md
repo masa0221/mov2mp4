@@ -1,4 +1,4 @@
-# movie-converter
+# mov2mp4
 
 [日本語](README.ja.md)
 
@@ -15,19 +15,19 @@ Runs on Docker (Ubuntu-based):
 
 ```bash
 # Build image
-docker build -t movie-converter .
+docker build -t mov2mp4 .
 ```
 
 Convert directory (output to `outputs/`, gitignored):
 
 ```bash
-docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" movie-converter /input /output
+docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 /input /output
 ```
 
 With options:
 
 ```bash
-docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" movie-converter -m fast /input /output
+docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 -m fast /input /output
 ```
 
 ## Usage
@@ -110,7 +110,7 @@ Top-level only:
 Docker:
 
 ```bash
-docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" movie-converter /input /output
+docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mov2mp4 /input /output
 ```
 
 Single file:

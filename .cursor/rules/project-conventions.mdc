@@ -1,9 +1,9 @@
 ---
-description: movie-converter project conventions and context
+description: mov2mp4 project conventions and context
 alwaysApply: true
 ---
 
-# movie-converter Project Conventions
+# mov2mp4 Project Conventions
 
 ## Structure
 - **Root**: Tool only (convert.sh, Dockerfile, etc.)

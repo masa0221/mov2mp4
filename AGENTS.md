@@ -1,4 +1,4 @@
-# movie-converter Agent Guide
+# mov2mp4 Agent Guide
 
 Context for AI agents working on this project.
 

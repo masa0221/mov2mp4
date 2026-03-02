@@ -20,7 +20,7 @@ jobs:
         with:
           context: .
           load: true
-          tags: movie-converter:latest
+          tags: mov2mp4:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -29,6 +29,6 @@ jobs:
           docker run --rm \
             -v "$(pwd)/tests/data:/input" \
             -v "$(pwd)/outputs:/output" \
-            movie-converter /input /output
+            mov2mp4 /input /output
           test -d outputs
           test -f outputs/sample1.mp4
