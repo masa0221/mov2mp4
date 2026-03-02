@@ -5,6 +5,9 @@ Context for AI agents working on this project.
 ## Project Overview
 Shell script that converts .mov to MP4. Safe mode (Vrew-compatible) and fast mode.
 
+## README
+When modifying README.md, also update README.ja.md with the same content (translated to Japanese).
+
 ## Key Conventions
 - **Output**: Always `outputs/` (gitignored)
 - **Language**: English in scripts

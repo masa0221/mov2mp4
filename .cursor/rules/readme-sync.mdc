@@ -1,0 +1,11 @@
+---
+description: Keep README.ja.md in sync when README is modified
+globs: README.md
+alwaysApply: false
+---
+
+# README Sync
+
+When editing README.md, also update README.ja.md with the same changes (in Japanese).
+
+Both files should have parallel structure and mutual links at the top.

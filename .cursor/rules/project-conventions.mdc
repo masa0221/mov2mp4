@@ -34,6 +34,11 @@ alwaysApply: true
 - Check required commands (ffmpeg, ffprobe) at start, exit with error if missing
 - Colored output when stdout is TTY
 
+## README
+- README.md (English) is the primary
+- README.ja.md (Japanese) must be kept in sync
+- When modifying README.md, update README.ja.md with the same changes
+
 ## Development Workflow
 When adding features or changes:
 1. Create branch (e.g. `feature/xxx`, `fix/xxx`)
