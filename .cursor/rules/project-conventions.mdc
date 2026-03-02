@@ -1,0 +1,48 @@
+---
+description: movie-converter project conventions and context
+alwaysApply: true
+---
+
+# movie-converter Project Conventions
+
+## Structure
+- **Root**: Tool only (convert.sh, Dockerfile, etc.)
+- **tests/**: Test-related (setup-testdata.sh, data/)
+- **outputs/**: All output goes here (gitignored)
+
+## Language
+- Script output and messages: **English only**
+- Comments in code: English
+
+## Output
+- Native and Docker: output to `outputs/` (gitignored)
+- Test runs: always use `outputs/` for output
+- Docker: `-v "$(pwd)/outputs:/output"`
+
+## Docker
+- No helper scripts (e.g. docker-run.sh)
+- Use `docker build` and `docker run` directly
+- Simple over easy
+
+## Test Data
+- `tests/data/`: Include both English (sample1.mov) and Japanese (サンプル1.mov) filenames
+- Regenerate with `./tests/setup-testdata.sh` (no source = synthetic, no external dependency)
+
+## Script Conventions
+- Options over env vars (e.g. `-m safe` not `MODE=safe`)
+- Default mode: safe
+- Check required commands (ffmpeg, ffprobe) at start, exit with error if missing
+- Colored output when stdout is TTY
+
+## README
+- README.md (English) is the primary
+- README.ja.md (Japanese) must be kept in sync
+- When modifying README.md, update README.ja.md with the same changes
+
+## Development Workflow
+When adding features or changes:
+1. Create branch (e.g. `feature/xxx`, `fix/xxx`)
+2. Implement and test locally
+3. Commit and push
+4. Create PR
+5. CI (GitHub Actions) runs on PR
