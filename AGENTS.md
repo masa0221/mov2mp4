@@ -28,9 +28,8 @@ When modifying README.md, also update README.ja.md with the same content (transl
 1. Create branch: `git checkout -b feature/xxx` or `fix/xxx`
 2. Implement changes
 3. Test locally (e.g. `./mov2mp4 tests/data`, Docker)
-4. Commit and push
-5. Create PR: `gh pr create`
-6. CI runs on PR (Docker build + convert test)
+4. Commit, push, create PR (use `/pr` skill — never push directly to main)
+5. CI runs on PR (Docker build + convert test)
 
-## Quick: Commit & Push
-Use skill `push` or say "push" / "PRに反映" to commit, push, and update PR without repeating the request.
+## Quick: Commit & PR
+Use skill `pr` or say "/pr" / "push" / "PRに反映" to create branch, commit, push, and open PR. **Never push directly to main.**

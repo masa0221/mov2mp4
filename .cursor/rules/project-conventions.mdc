@@ -43,6 +43,6 @@ alwaysApply: true
 When adding features or changes:
 1. Create branch (e.g. `feature/xxx`, `fix/xxx`)
 2. Implement and test locally
-3. Commit and push
-4. Create PR
+3. Commit, push, and create PR (use `/pr` skill)
+4. Merge via PR — **never push directly to main**
 5. CI (GitHub Actions) runs on PR
