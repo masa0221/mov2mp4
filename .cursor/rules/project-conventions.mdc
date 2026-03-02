@@ -33,3 +33,11 @@ alwaysApply: true
 - Default mode: safe
 - Check required commands (ffmpeg, ffprobe) at start, exit with error if missing
 - Colored output when stdout is TTY
+
+## Development Workflow
+When adding features or changes:
+1. Create branch (e.g. `feature/xxx`, `fix/xxx`)
+2. Implement and test locally
+3. Commit and push
+4. Create PR
+5. CI (GitHub Actions) runs on PR

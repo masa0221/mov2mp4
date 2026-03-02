@@ -20,3 +20,11 @@ Shell script that converts .mov to MP4. Safe mode (Vrew-compatible) and fast mod
 ## When Testing
 - Output to `outputs/`
 - Docker: `-v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output"`
+
+## Development Workflow (do without being asked)
+1. Create branch: `git checkout -b feature/xxx` or `fix/xxx`
+2. Implement changes
+3. Test locally (e.g. `./convert.sh tests/data`, Docker)
+4. Commit and push
+5. Create PR: `gh pr create`
+6. CI runs on PR (Docker build + convert test)
