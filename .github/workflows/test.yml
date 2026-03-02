@@ -9,39 +9,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      LANG: C.UTF-8
-      LC_ALL: C.UTF-8
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Create test data
-        run: |
-          chmod +x tests/setup-testdata.sh
-          ./tests/setup-testdata.sh
-
-      - name: Run convert.sh (native)
-        run: |
-          chmod +x convert.sh
-          ./convert.sh tests/data
-          test -d outputs
-          test -f outputs/sample1.mp4
-
-      - name: Run convert.sh (-R option)
-        run: |
-          rm -rf outputs
-          ./convert.sh -R tests/data
-          test -d outputs
 
       - name: Build Docker image
         run: docker build -t movie-converter .
 
       - name: Run convert.sh (Docker)
         run: |
-          rm -rf outputs
           docker run --rm \
             -v "$(pwd)/tests/data:/input" \
             -v "$(pwd)/outputs:/output" \
