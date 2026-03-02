@@ -4,23 +4,108 @@ set -u
 export LANG="${LANG:-ja_JP.UTF-8}"
 export LC_ALL="${LC_ALL:-ja_JP.UTF-8}"
 
-src="${1:-}"
-dst="${2:-}"
-mode="${MODE:-fast}"  # fast | safe
+# Colors (only when stdout is a TTY)
+if [[ -t 1 ]]; then
+  R='\033[0;31m'
+  G='\033[0;32m'
+  Y='\033[0;33m'
+  C='\033[0;36m'
+  X='\033[0m'
+else
+  R= G= Y= C= X=
+fi
 
-if [[ -z "$src" || -z "$dst" ]]; then
-  echo "使い方: MODE=fast|safe $0 入力ディレクトリ 出力ディレクトリ"
+mode="safe"
+recursive=1
+dst="outputs"
+dst_specified=0
+
+# Option parsing
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -m|--mode)
+      mode="$2"
+      shift 2
+      ;;
+    -r|--recursive)
+      recursive=1
+      shift
+      ;;
+    -R|--no-recursive)
+      recursive=0
+      shift
+      ;;
+    -o|--output)
+      dst="$2"
+      dst_specified=1
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: $0 [options] input(file|directory) [output_directory]"
+      echo ""
+      echo "Options:"
+      echo "  -m, --mode MODE       Conversion mode: fast | safe (default: safe)"
+      echo "  -r, --recursive       Recursive search in directory (default)"
+      echo "  -R, --no-recursive    Top-level only"
+      echo "  -o, --output DIR      Output directory"
+      echo "  -h, --help            Show this help"
+      echo ""
+      echo "Examples:"
+      echo "  $0 video.mov                    # Single file, output to outputs/"
+      echo "  $0 -m fast ./videos             # Directory conversion in fast mode"
+      echo "  $0 -R -o out ./videos            # No recursive, output to out/"
+      exit 0
+      ;;
+    -*)
+      echo -e "${R}Unknown option: $1${X}"
+      echo "  Use -h for help"
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+input="${1:-}"
+if [[ $dst_specified -eq 0 && -n "${2:-}" ]]; then
+  dst="$2"
+fi
+
+if [[ -z "$input" ]]; then
+  echo "Usage: $0 [options] input(file|directory) [output_directory]"
+  echo "  Use -h for help"
   exit 1
 fi
 
 if [[ "$mode" != "fast" && "$mode" != "safe" ]]; then
-  echo "MODE は fast か safe を指定してください（例: MODE=safe）"
+  echo -e "${R}MODE must be fast or safe (e.g. -m safe)${X}"
   exit 1
 fi
 
-src="$(cd "$src" && pwd)"
+if [[ ! -e "$input" ]]; then
+  echo -e "${R}Input does not exist: $input${X}"
+  exit 1
+fi
+
+for cmd in ffmpeg ffprobe; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo -e "${R}Error: Required command not found: $cmd${X}"
+    echo -e "  Install ffmpeg (e.g. brew install ffmpeg)"
+    exit 1
+  fi
+done
+
 mkdir -p "$dst"
 dst="$(cd "$dst" && pwd)"
+
+if [[ -f "$input" ]]; then
+  src_base="$(cd "$(dirname "$input")" && pwd)"
+  input_file="$src_base/$(basename "$input")"
+else
+  src_base="$(cd "$input" && pwd)"
+  input_file=""
+fi
 
 log_dir="$dst/_logs"
 mkdir -p "$log_dir"
@@ -48,9 +133,9 @@ skip=0
 missing=0
 total=0
 
-# ffmpeg/aac は mac のffmpegで基本OK（なければ safe/fast ともに失敗ログに出る）
-# safe: CFR 30fps + yuv420p + High/4.0 + aac
-# fast: 可能なら映像copy、音声aac（Vrewに寄せる）。copy失敗なら再エンコードへフォールバック。
+# ffmpeg/aac: works with mac ffmpeg (otherwise logged in failed_detail)
+# safe: CFR 30fps + yuv420p + High/4.0 + aac (for Vrew)
+# fast: try video copy when h264, encode audio to AAC. Fallback to re-encode on copy failure.
 
 convert_one() {
   local f="$1"
@@ -65,8 +150,9 @@ convert_one() {
     return 0
   fi
 
-  rel="${f#$src/}"
-  out="$dst/${rel%.mov}.mp4"
+  rel="${f#$src_base/}"
+  rel="${rel#/}"  # Remove leading / (when src_base is /)
+  out="$dst/${rel%.*}.mp4"
   mkdir -p "$(dirname "$out")"
 
   if [[ -f "$out" ]]; then
@@ -75,7 +161,7 @@ convert_one() {
     return 0
   fi
 
-  printf '変換中(%s): %s\n' "$mode" "$f"
+  printf "${C}Converting${X}(%s): %s\n" "$mode" "$f"
 
   errfile="$log_dir/err.$$.txt"
   : > "$errfile"
@@ -88,7 +174,7 @@ convert_one() {
   )"
 
   if [[ "$mode" == "safe" ]]; then
-    # Vrewに寄せる: CFR30 / yuv420p / High / level4.0 / AAC(48k)
+    # For Vrew: CFR30 / yuv420p / High / level4.0 / AAC(48k)
     ffmpeg -nostdin -hide_banner -y -i "$f" \
       -map 0:v:0 -map 0:a:0? \
       -vf "fps=30,format=yuv420p" \
@@ -97,7 +183,7 @@ convert_one() {
       -movflags +faststart \
       "$out" </dev/null >>"$errfile" 2>&1
   else
-    # fast: まず映像copyを試す（h264のとき）。音声はAACへ。
+    # fast: try video copy first (when h264). Encode audio to AAC.
     if [[ "$vcodec" == "h264" ]]; then
       ffmpeg -nostdin -hide_banner -y -i "$f" \
         -map 0:v:0 -map 0:a:0? \
@@ -107,7 +193,7 @@ convert_one() {
         "$out" </dev/null >>"$errfile" 2>&1
 
       if [[ $? -ne 0 ]]; then
-        # copy失敗 → 再エンコード（ただしfps固定はしない）
+        # Copy failed → re-encode (without fixed fps)
         ffmpeg -nostdin -hide_banner -y -i "$f" \
           -map 0:v:0 -map 0:a:0? \
           -c:v libx264 -preset veryfast -crf 18 \
@@ -144,34 +230,51 @@ convert_one() {
   rm -f "$errfile"
 }
 
-# find の入力を壊さない（ffmpeg/ffprobeはnostdin + /dev/null）
-while IFS= read -r -d '' f; do
-  convert_one "$f"
-done < <(find "$src" -type f -name "*.mov" -print0)
+# Get input file list (pass directly, not via variable, due to null bytes)
+if [[ -n "$input_file" ]]; then
+  # Single file
+  while IFS= read -r -d '' f; do
+    [[ -z "$f" ]] && continue
+    convert_one "$f"
+  done < <(printf '%s\0' "$input_file")
+else
+  # Directory (top-level only when -R)
+  if [[ "$recursive" == "1" ]]; then
+    while IFS= read -r -d '' f; do
+      [[ -z "$f" ]] && continue
+      convert_one "$f"
+    done < <(find "$src_base" -type f -name "*.mov" -print0)
+  else
+    while IFS= read -r -d '' f; do
+      [[ -z "$f" ]] && continue
+      convert_one "$f"
+    done < <(find "$src_base" -maxdepth 1 -type f -name "*.mov" -print0)
+  fi
+fi
 
-# 出力一覧（出力側のmp4を列挙してmov名に戻す）
+# Output list (enumerate mp4 files, convert back to mov names)
 find "$dst" -type f -name "*.mp4" -print0 \
 | tr '\0' '\n' \
 | sed "s|^$dst/||" \
 | sed 's|\.mp4$|.mov|' \
 | sort > "$outputs_txt"
 
-# 入力一覧（相対にしてソート）
-sed "s|^$src/||" "$inputs_txt" | sort > "$inputs_txt.sorted"
+# Input list (normalize to relative path, .mov format, sort for comparison with outputs_txt)
+sed "s|^$src_base/||" "$inputs_txt" | sed 's|\.[^./]*$|.mov|' | sort > "$inputs_txt.sorted"
 mv "$inputs_txt.sorted" "$inputs_txt"
 
-# 未変換（入力にあって出力にないmov）
+# Not converted (mov in input but not in output)
 comm -23 "$inputs_txt" "$outputs_txt" > "$not_converted_txt" || true
 
 {
   echo "MODE: $mode"
-  echo "SRC : $src"
+  echo "SRC : $src_base"
   echo "DST : $dst"
   echo "TOTAL  : $total"
-  echo "OK     : $ok"
-  echo "SKIP   : $skip"
-  echo "MISSING: $missing"
-  echo "FAIL   : $fail"
+  echo -e "OK     : ${G}$ok${X}"
+  echo -e "SKIP   : ${Y}$skip${X}"
+  echo -e "MISSING: ${Y}$missing${X}"
+  echo -e "FAIL   : ${R}$fail${X}"
   echo
   echo "skipped       : $skipped_list"
   echo "failed list   : $failed_list"
@@ -179,4 +282,4 @@ comm -23 "$inputs_txt" "$outputs_txt" > "$not_converted_txt" || true
   echo "not converted : $not_converted_txt"
 } | tee "$summary"
 
-echo "完了"
+echo -e "${G}Done${X}"
