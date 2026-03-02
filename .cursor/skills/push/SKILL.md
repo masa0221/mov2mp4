@@ -1,6 +1,6 @@
 ---
-name: commit-push-pr
-description: Commit changes, push to branch, and update PR. Use when the user says "commit push", "PRに反映", "push", "コミットプッシュ", or wants to save and push their work to the current branch.
+name: push
+description: Commit, push, update PR. Use when user says "push", "PRに反映", "commit push", or wants to save and push work.
 ---
 
 # Commit, Push, PR

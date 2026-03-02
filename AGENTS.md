@@ -33,4 +33,4 @@ When modifying README.md, also update README.ja.md with the same content (transl
 6. CI runs on PR (Docker build + convert test)
 
 ## Quick: Commit & Push
-Use skill `commit-push-pr` or say "commit push" / "PRに反映" to commit, push, and update PR without repeating the request.
+Use skill `push` or say "push" / "PRに反映" to commit, push, and update PR without repeating the request.
