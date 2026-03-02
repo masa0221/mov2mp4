@@ -33,7 +33,7 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 ## 使い方
 
 ```bash
-./convert.sh [オプション] 入力(ファイル|ディレクトリ) [出力ディレクトリ]
+./mov2mp4 [オプション] 入力(ファイル|ディレクトリ) [出力ディレクトリ]
 ```
 
 ### オプション
@@ -56,31 +56,31 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 単一ファイルを変換（出力は outputs/）:
 
 ```bash
-./convert.sh video.mov
+./mov2mp4 video.mov
 ```
 
 ディレクトリを変換（再帰検索）:
 
 ```bash
-./convert.sh ./videos
+./mov2mp4 ./videos
 ```
 
 fast モードで変換:
 
 ```bash
-./convert.sh -m fast ./videos
+./mov2mp4 -m fast ./videos
 ```
 
 トップ階層のみ、出力先を指定:
 
 ```bash
-./convert.sh -R -o ./out ./videos
+./mov2mp4 -R -o ./out ./videos
 ```
 
 単一ファイル、出力先を指定:
 
 ```bash
-./convert.sh -o ./out video.mov
+./mov2mp4 -o ./out video.mov
 ```
 
 出力先を省略した場合は `outputs/` に出力されます。ログは `出力先/_logs/` に保存されます。
@@ -98,13 +98,13 @@ fast モードで変換:
 ディレクトリ変換（再帰、出力は outputs/）:
 
 ```bash
-./convert.sh tests/data
+./mov2mp4 tests/data
 ```
 
 トップ階層のみ:
 
 ```bash
-./convert.sh -R tests/data
+./mov2mp4 -R tests/data
 ```
 
 Docker でテスト:
@@ -116,7 +116,7 @@ docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mo
 単一ファイル:
 
 ```bash
-./convert.sh tests/data/sample1.mov
+./mov2mp4 tests/data/sample1.mov
 ```
 
 ### テストデータの再作成

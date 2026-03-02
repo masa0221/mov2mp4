@@ -6,7 +6,7 @@ alwaysApply: true
 # mov2mp4 Project Conventions
 
 ## Structure
-- **Root**: Tool only (convert.sh, Dockerfile, etc.)
+- **Root**: Tool only (mov2mp4, Dockerfile, etc.)
 - **tests/**: Test-related (setup-testdata.sh, data/)
 - **outputs/**: All output goes here (gitignored)
 

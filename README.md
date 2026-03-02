@@ -33,7 +33,7 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 ## Usage
 
 ```bash
-./convert.sh [options] input(file|directory) [output_directory]
+./mov2mp4 [options] input(file|directory) [output_directory]
 ```
 
 ### Options
@@ -56,31 +56,31 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 Single file (output to outputs/):
 
 ```bash
-./convert.sh video.mov
+./mov2mp4 video.mov
 ```
 
 Convert directory (recursive):
 
 ```bash
-./convert.sh ./videos
+./mov2mp4 ./videos
 ```
 
 Fast mode:
 
 ```bash
-./convert.sh -m fast ./videos
+./mov2mp4 -m fast ./videos
 ```
 
 Top-level only, specify output:
 
 ```bash
-./convert.sh -R -o ./out ./videos
+./mov2mp4 -R -o ./out ./videos
 ```
 
 Single file, specify output:
 
 ```bash
-./convert.sh -o ./out video.mov
+./mov2mp4 -o ./out video.mov
 ```
 
 Output defaults to `outputs/`. Logs are saved in `output/_logs/`.
@@ -98,13 +98,13 @@ Use `outputs/` (gitignored) for test output.
 Directory conversion (recursive, output to outputs/):
 
 ```bash
-./convert.sh tests/data
+./mov2mp4 tests/data
 ```
 
 Top-level only:
 
 ```bash
-./convert.sh -R tests/data
+./mov2mp4 -R tests/data
 ```
 
 Docker:
@@ -116,7 +116,7 @@ docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mo
 Single file:
 
 ```bash
-./convert.sh tests/data/sample1.mov
+./mov2mp4 tests/data/sample1.mov
 ```
 
 ### Regenerate Test Data

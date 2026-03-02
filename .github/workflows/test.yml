@@ -24,7 +24,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Run convert.sh (Docker)
+      - name: Run mov2mp4 (Docker)
         run: |
           docker run --rm \
             -v "$(pwd)/tests/data:/input" \

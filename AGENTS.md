@@ -27,7 +27,7 @@ When modifying README.md, also update README.ja.md with the same content (transl
 ## Development Workflow (do without being asked)
 1. Create branch: `git checkout -b feature/xxx` or `fix/xxx`
 2. Implement changes
-3. Test locally (e.g. `./convert.sh tests/data`, Docker)
+3. Test locally (e.g. `./mov2mp4 tests/data`, Docker)
 4. Commit and push
 5. Create PR: `gh pr create`
 6. CI runs on PR (Docker build + convert test)

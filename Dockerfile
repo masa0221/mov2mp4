@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY convert.sh /app/
+COPY mov2mp4 /app/
 COPY tests/ /app/tests/
-RUN chmod +x /app/convert.sh
+RUN chmod +x /app/mov2mp4
 
-ENTRYPOINT ["/app/convert.sh"]
+ENTRYPOINT ["/app/mov2mp4"]
