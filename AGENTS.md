@@ -33,3 +33,6 @@ When modifying README.md, also update README.ja.md with the same content (transl
 
 ## Quick: Commit & PR
 Use skill `pr` or say "/pr" / "push" / "PRに反映" to create branch, commit, push, and open PR. **Never push directly to main.**
+
+## Quick: Merge PR
+Use skill `merge` or say "/merge" / "PRをマージ" to merge the current PR (squash), sync main, and delete the branch.
