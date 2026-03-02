@@ -1,137 +1,139 @@
 # movie-converter
 
-動画ファイル（.mov）を MP4 に変換するシェルスクリプト。Vrew 用の safe モードと、高速な fast モードを用意。
+[日本語](README.ja.md)
 
-## 前提条件
+Shell script to convert video files (.mov) to MP4. Safe mode for Vrew and fast mode for quick conversion.
+
+## Requirements
 
 - bash
 - ffmpeg / ffprobe
 
 ## Docker
 
-Docker でも実行できます（Ubuntu ベース）:
+Runs on Docker (Ubuntu-based):
 
 ```bash
-# イメージをビルド
+# Build image
 docker build -t movie-converter .
 ```
 
-ディレクトリを変換（出力は `outputs/` に統一。gitignore 対象）:
+Convert directory (output to `outputs/`, gitignored):
 
 ```bash
 docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" movie-converter /input /output
 ```
 
-オプション付き:
+With options:
 
 ```bash
 docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" movie-converter -m fast /input /output
 ```
 
-## 使い方
+## Usage
 
 ```bash
-./convert.sh [オプション] 入力(ファイル|ディレクトリ) [出力ディレクトリ]
+./convert.sh [options] input(file|directory) [output_directory]
 ```
 
-### オプション
+### Options
 
-| オプション | 説明 |
-|-----------|------|
-| `-m`, `--mode MODE` | 変換モード: `fast` \| `safe`（デフォルト: safe） |
-| `-r`, `--recursive` | ディレクトリ内を再帰検索（デフォルト） |
-| `-R`, `--no-recursive` | トップ階層のみ検索 |
-| `-o`, `--output DIR` | 出力ディレクトリ |
-| `-h`, `--help` | ヘルプを表示 |
+| Option | Description |
+|--------|-------------|
+| `-m`, `--mode MODE` | Conversion mode: `fast` \| `safe` (default: safe) |
+| `-r`, `--recursive` | Recursive search in directory (default) |
+| `-R`, `--no-recursive` | Top-level only |
+| `-o`, `--output DIR` | Output directory |
+| `-h`, `--help` | Show help |
 
-### 変換モード
+### Conversion Modes
 
-- **safe**: CFR 30fps + yuv420p + H.264 High/4.0 + AAC（Vrew 向け）
-- **fast**: 可能なら映像コピー、音声のみ AAC エンコード。コピー失敗時は再エンコード
+- **safe**: CFR 30fps + yuv420p + H.264 High/4.0 + AAC (for Vrew)
+- **fast**: Video copy when possible, audio to AAC. Re-encode on copy failure
 
-### 使用例
+### Examples
 
-単一ファイルを変換（出力は outputs/）:
+Single file (output to outputs/):
 
 ```bash
 ./convert.sh video.mov
 ```
 
-ディレクトリを変換（再帰検索）:
+Convert directory (recursive):
 
 ```bash
 ./convert.sh ./videos
 ```
 
-fast モードで変換:
+Fast mode:
 
 ```bash
 ./convert.sh -m fast ./videos
 ```
 
-トップ階層のみ、出力先を指定:
+Top-level only, specify output:
 
 ```bash
 ./convert.sh -R -o ./out ./videos
 ```
 
-単一ファイル、出力先を指定:
+Single file, specify output:
 
 ```bash
 ./convert.sh -o ./out video.mov
 ```
 
-出力先を省略した場合は `outputs/` に出力されます。ログは `出力先/_logs/` に保存されます。
+Output defaults to `outputs/`. Logs are saved in `output/_logs/`.
 
-## テスト
+## Testing
 
-### テストデータについて
+### Test Data
 
-`tests/data/` に短いテスト用動画が含まれています（git 管理）。英語名（sample1.mov など）と日本語名（サンプル1.mov など）の両方を含み、そのままテストに利用できます。
+`tests/data/` contains short test videos (git-tracked). Includes both English (sample1.mov) and Japanese (サンプル1.mov) filenames.
 
-テスト時の出力先は `outputs/`（gitignore 対象）を指定すること。
+Use `outputs/` (gitignored) for test output.
 
-### テストの実行
+### Run Tests
 
-ディレクトリ変換（再帰、出力は outputs/）:
+Directory conversion (recursive, output to outputs/):
 
 ```bash
 ./convert.sh tests/data
 ```
 
-トップ階層のみ:
+Top-level only:
 
 ```bash
 ./convert.sh -R tests/data
 ```
 
-Docker でテスト:
+Docker:
 
 ```bash
 docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" movie-converter /input /output
 ```
 
-単一ファイル:
+Single file:
 
 ```bash
 ./convert.sh tests/data/sample1.mov
 ```
 
-### テストデータの再作成
+### Regenerate Test Data
 
 ```bash
-./tests/setup-testdata.sh [ソースディレクトリ] [秒数]
+./tests/setup-testdata.sh [source_directory] [seconds]
 ```
 
-- **ソース省略**: ffmpeg で合成動画を生成（外部依存なし、5秒）
-- **ソース指定**: 既存動画から先頭 N 秒を切り出し
+- **No source**: Generate synthetic video (no external dependency, 5s)
+- **With source**: Extract first N seconds from existing videos
 
-ソース指定の例（3秒に変更）:
+Example with source (3 seconds):
 
 ```bash
 ./tests/setup-testdata.sh /path/to/videos 3
 ```
 
-## ライセンス
+## License
 
-[LICENSE](LICENSE) を参照してください。
+See [LICENSE](LICENSE).
