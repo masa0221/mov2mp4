@@ -98,6 +98,7 @@ fi
 
 echo ""
 echo -e "${G}Done${X}. Test examples (from project root):"
+echo "  ./tests/run-tests.sh             # Run all tests"
 echo "  ./mov2mp4 tests/data             # Directory (recursive)"
 echo "  ./mov2mp4 -R tests/data           # Directory (top-level only)"
 echo "  ./mov2mp4 tests/data/sample1.mov  # Single file"

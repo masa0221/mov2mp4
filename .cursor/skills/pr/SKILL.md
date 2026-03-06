@@ -8,7 +8,8 @@ description: Create branch, commit, push, and open PR. Use when user says "pr", 
 When the user wants to commit and push (or similar phrasing), do the following **without pushing directly to main**:
 
 1. **Check status**: `git status`
-2. **If on main branch**: Create a feature branch first:
+2. **If on main branch**: Sync main and create a feature branch:
+   - `git checkout main && git pull`
    - `git checkout -b feature/update` (or `feature/<slug>` from commit message, e.g. "Rename X to Y" → `feature/rename-x-to-y`)
 3. **Stage**: `git add` (appropriate files, exclude outputs/ and other gitignored)
 4. **Commit**: `git commit -m "..."` with a concise message describing the changes

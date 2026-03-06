@@ -25,11 +25,14 @@ When modifying README.md, also update README.ja.md with the same content (transl
 - Docker: `-v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output"`
 
 ## Development Workflow (do without being asked)
-1. Create branch: `git checkout -b feature/xxx` or `fix/xxx`
-2. Implement changes
-3. Test locally (e.g. `./mov2mp4 tests/data`, Docker)
-4. Commit, push, create PR (use `/pr` skill — never push directly to main)
-5. CI runs on PR (Docker build + convert test)
+**When starting any fix or feature task**: First sync main, then create a branch. Do not work directly on main.
+
+1. **Start from latest main**: `git checkout main && git pull` — always sync before creating a branch
+2. **Create branch**: `git checkout -b feature/xxx` or `fix/xxx`
+3. Implement changes
+4. Test locally (e.g. `./tests/run-tests.sh`, Docker)
+5. Commit, push, create PR (use `/pr` skill — never push directly to main)
+6. CI runs on PR (Docker build + convert test)
 
 ## Quick: Commit & PR
 Use skill `pr` or say "/pr" / "push" / "PRに反映" to create branch, commit, push, and open PR. **Never push directly to main.**

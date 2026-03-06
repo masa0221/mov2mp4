@@ -2,7 +2,7 @@
 
 [日本語](README.ja.md)
 
-Shell script to convert video files (.mov) to MP4. Safe mode for Vrew and fast mode for quick conversion.
+Shell script to convert video files (.mov, .mp4) to MP4 or extract audio to MP3. Safe mode for Vrew and fast mode for quick conversion.
 
 ## Requirements
 
@@ -28,6 +28,7 @@ With options:
 
 ```bash
 docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 -m fast /input /output
+docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 -a /input /output
 ```
 
 ## Usage
@@ -40,6 +41,7 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 
 | Option | Description |
 |--------|-------------|
+| `-a`, `--audio-only` | Extract audio to MP3 (from .mov/.mp4) |
 | `-m`, `--mode MODE` | Conversion mode: `fast` \| `safe` (default: safe) |
 | `-r`, `--recursive` | Recursive search in directory (default) |
 | `-R`, `--no-recursive` | Top-level only |
@@ -48,8 +50,10 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 
 ### Conversion Modes
 
-- **safe**: CFR 30fps + yuv420p + H.264 High/4.0 + AAC (for Vrew)
-- **fast**: Video copy when possible, audio to AAC. Re-encode on copy failure
+- **video** (default): Convert .mov to MP4
+  - **safe**: CFR 30fps + yuv420p + H.264 High/4.0 + AAC (for Vrew)
+  - **fast**: Video copy when possible, audio to AAC. Re-encode on copy failure
+- **audio** (`-a`): Extract audio to MP3 from .mov or .mp4 (192k, 48kHz, stereo)
 
 ### Examples
 
@@ -57,6 +61,14 @@ Single file (output to outputs/):
 
 ```bash
 ./mov2mp4 video.mov
+```
+
+Extract MP3 from video:
+
+```bash
+./mov2mp4 -a video.mp4
+./mov2mp4 -a video.mov
+./mov2mp4 -a ./videos
 ```
 
 Convert directory (recursive):
@@ -95,15 +107,18 @@ Use `outputs/` (gitignored) for test output.
 
 ### Run Tests
 
-Directory conversion (recursive, output to outputs/):
+Automated test script (video conversion + MP3 extraction):
+
+```bash
+./tests/run-tests.sh
+./tests/run-tests.sh --docker
+```
+
+Manual tests:
 
 ```bash
 ./mov2mp4 tests/data
-```
-
-Top-level only:
-
-```bash
+./mov2mp4 -a tests/data
 ./mov2mp4 -R tests/data
 ```
 
@@ -111,12 +126,14 @@ Docker:
 
 ```bash
 docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mov2mp4 /input /output
+docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mov2mp4 -a /input /output
 ```
 
 Single file:
 
 ```bash
 ./mov2mp4 tests/data/sample1.mov
+./mov2mp4 -a tests/data/sample1.mov
 ```
 
 ### Regenerate Test Data

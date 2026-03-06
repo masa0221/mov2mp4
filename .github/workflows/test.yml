@@ -32,3 +32,11 @@ jobs:
             mov2mp4 /input /output
           test -d outputs
           test -f outputs/sample1.mp4
+
+      - name: Run mov2mp4 -a MP3 extraction (Docker)
+        run: |
+          docker run --rm \
+            -v "$(pwd)/tests/data:/input" \
+            -v "$(pwd)/outputs:/output" \
+            mov2mp4 -a /input /output
+          test -f outputs/sample1.mp3
