@@ -4,6 +4,14 @@
 
 動画ファイル（.mov、.mp4）を MP4 に変換したり、音声を MP3 に抽出するシェルスクリプト。Vrew 用の safe モードと、高速な fast モードを用意。
 
+## インストール (Homebrew)
+
+```bash
+brew install masa0221/tap/mov2mp4
+```
+
+ffmpeg が必要: `brew install ffmpeg`
+
 ## 前提条件
 
 - bash

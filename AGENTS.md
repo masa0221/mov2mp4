@@ -33,9 +33,13 @@ When modifying README.md, also update README.ja.md with the same content (transl
 4. Test locally (e.g. `./tests/run-tests.sh`, Docker)
 5. Commit, push, create PR (use `/pr` skill — never push directly to main)
 6. CI runs on PR (Docker build + convert test)
+7. **After merge**: Create release (tag + homebrew-tap update) — use `/release` skill
 
 ## Quick: Commit & PR
 Use skill `pr` or say "/pr" / "push" / "PRに反映" to create branch, commit, push, and open PR. **Never push directly to main.**
 
 ## Quick: Merge PR
 Use skill `merge` or say "/merge" / "PRをマージ" to merge the current PR (squash), sync main, and delete the branch.
+
+## Quick: Release (after merge)
+Use skill `release` or say "/release" / "リリース" / "タグ打って" to create tag, GitHub release, and update [homebrew-tap](https://github.com/masa0221/homebrew-tap) so `brew install masa0221/tap/mov2mp4` works.
