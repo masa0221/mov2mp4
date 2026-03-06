@@ -4,6 +4,14 @@
 
 Shell script to convert video files (.mov, .mp4) to MP4 or extract audio to MP3. Safe mode for Vrew and fast mode for quick conversion.
 
+## Install (Homebrew)
+
+```bash
+brew install masa0221/tap/mov2mp4
+```
+
+Requires ffmpeg: `brew install ffmpeg`
+
 ## Requirements
 
 - bash

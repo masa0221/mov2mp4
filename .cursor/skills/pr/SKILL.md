@@ -12,13 +12,15 @@ When the user wants to commit and push (or similar phrasing), do the following *
    - `git checkout main && git pull`
    - `git checkout -b feature/update` (or `feature/<slug>` from commit message, e.g. "Rename X to Y" → `feature/rename-x-to-y`)
 3. **Stage**: `git add` (appropriate files, exclude outputs/ and other gitignored)
-4. **Commit**: `git commit -m "..."` with a concise message describing the changes
-5. **Push**: `git push -u origin HEAD`
-6. **Create PR**: `gh pr create` (or `gh pr create --fill` to use commit message as title/body)
+4. **Before commit**: Run `npx markdownlint-cli2 "**/*.md"` and fix any issues (e.g. MD022: blank lines around headings)
+5. **Commit**: `git commit -m "..."` with a concise message describing the changes
+6. **Push**: `git push -u origin HEAD`
+7. **Create PR**: `gh pr create` (or `gh pr create --fill` to use commit message as title/body)
 
-If already on a feature branch with a PR, steps 2 and 6 are skipped; push updates the existing PR.
+If already on a feature branch with a PR, steps 2 and 7 are skipped; push updates the existing PR.
 
 **Commit message**: Use imperative, concise. Examples:
+
 - `Add README sync rule`
 - `Simplify CI to Docker only`
 - `Fix locale warning in Docker`

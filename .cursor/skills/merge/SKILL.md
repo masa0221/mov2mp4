@@ -16,3 +16,5 @@ When the user wants to merge the current PR, do the following:
 If the user prefers merge commit over squash, use `--merge` instead of `--squash`.
 
 **Note**: Run from the feature branch, or specify the PR number to merge.
+
+**After merge**: To release (tag + Homebrew), use the `release` skill or say "/release" / "リリース".
