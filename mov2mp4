@@ -19,10 +19,15 @@ mode="safe"
 recursive=1
 dst="outputs"
 dst_specified=0
+audio_only=0
 
 # Option parsing
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    -a|--audio-only)
+      audio_only=1
+      shift
+      ;;
     -m|--mode)
       mode="$2"
       shift 2
@@ -44,6 +49,7 @@ while [[ $# -gt 0 ]]; do
       echo "Usage: $0 [options] input(file|directory) [output_directory]"
       echo ""
       echo "Options:"
+      echo "  -a, --audio-only     Extract audio to MP3 (from .mov/.mp4)"
       echo "  -m, --mode MODE       Conversion mode: fast | safe (default: safe)"
       echo "  -r, --recursive       Recursive search in directory (default)"
       echo "  -R, --no-recursive    Top-level only"
@@ -52,8 +58,10 @@ while [[ $# -gt 0 ]]; do
       echo ""
       echo "Examples:"
       echo "  $0 video.mov                    # Single file, output to outputs/"
+      echo "  $0 -a video.mp4                 # Extract MP3 from MP4"
+      echo "  $0 -a ./videos                  # Extract MP3 from .mov/.mp4 in dir"
       echo "  $0 -m fast ./videos             # Directory conversion in fast mode"
-      echo "  $0 -R -o out ./videos            # No recursive, output to out/"
+      echo "  $0 -R -o out ./videos           # No recursive, output to out/"
       exit 0
       ;;
     -*)
@@ -152,7 +160,11 @@ convert_one() {
 
   rel="${f#$src_base/}"
   rel="${rel#/}"  # Remove leading / (when src_base is /)
-  out="$dst/${rel%.*}.mp4"
+  if [[ "$audio_only" -eq 1 ]]; then
+    out="$dst/${rel%.*}.mp3"
+  else
+    out="$dst/${rel%.*}.mp4"
+  fi
   mkdir -p "$(dirname "$out")"
 
   if [[ -f "$out" ]]; then
@@ -161,39 +173,58 @@ convert_one() {
     return 0
   fi
 
-  printf "${C}Converting${X}(%s): %s\n" "$mode" "$f"
+  if [[ "$audio_only" -eq 1 ]]; then
+    printf "${C}Converting${X}(audio): %s\n" "$f"
+  else
+    printf "${C}Converting${X}(%s): %s\n" "$mode" "$f"
+  fi
 
   errfile="$log_dir/err.$$.txt"
   : > "$errfile"
 
-  vcodec="$(
-    ffprobe -nostdin -v error -select_streams v:0 \
-      -show_entries stream=codec_name \
-      -of default=nw=1:nk=1 "$f" \
-      </dev/null 2>>"$errfile" || true
-  )"
-
-  if [[ "$mode" == "safe" ]]; then
-    # For Vrew: CFR30 / yuv420p / High / level4.0 / AAC(48k)
+  if [[ "$audio_only" -eq 1 ]]; then
+    # Extract audio to MP3 (libmp3lame, 192k)
     ffmpeg -nostdin -hide_banner -y -i "$f" \
-      -map 0:v:0 -map 0:a:0? \
-      -vf "fps=30,format=yuv420p" \
-      -c:v libx264 -profile:v high -level 4.0 -preset veryfast -crf 18 \
-      -c:a aac -b:a 192k -ar 48000 -ac 2 \
-      -movflags +faststart \
+      -vn -map 0:a:0? \
+      -c:a libmp3lame -b:a 192k -ar 48000 -ac 2 \
       "$out" </dev/null >>"$errfile" 2>&1
   else
-    # fast: try video copy first (when h264). Encode audio to AAC.
-    if [[ "$vcodec" == "h264" ]]; then
+    vcodec="$(
+      ffprobe -nostdin -v error -select_streams v:0 \
+        -show_entries stream=codec_name \
+        -of default=nw=1:nk=1 "$f" \
+        </dev/null 2>>"$errfile" || true
+    )"
+
+    if [[ "$mode" == "safe" ]]; then
+      # For Vrew: CFR30 / yuv420p / High / level4.0 / AAC(48k)
       ffmpeg -nostdin -hide_banner -y -i "$f" \
         -map 0:v:0 -map 0:a:0? \
-        -c:v copy \
+        -vf "fps=30,format=yuv420p" \
+        -c:v libx264 -profile:v high -level 4.0 -preset veryfast -crf 18 \
         -c:a aac -b:a 192k -ar 48000 -ac 2 \
         -movflags +faststart \
         "$out" </dev/null >>"$errfile" 2>&1
+    else
+      # fast: try video copy first (when h264). Encode audio to AAC.
+      if [[ "$vcodec" == "h264" ]]; then
+        ffmpeg -nostdin -hide_banner -y -i "$f" \
+          -map 0:v:0 -map 0:a:0? \
+          -c:v copy \
+          -c:a aac -b:a 192k -ar 48000 -ac 2 \
+          -movflags +faststart \
+          "$out" </dev/null >>"$errfile" 2>&1
 
-      if [[ $? -ne 0 ]]; then
-        # Copy failed → re-encode (without fixed fps)
+        if [[ $? -ne 0 ]]; then
+          # Copy failed → re-encode (without fixed fps)
+          ffmpeg -nostdin -hide_banner -y -i "$f" \
+            -map 0:v:0 -map 0:a:0? \
+            -c:v libx264 -preset veryfast -crf 18 \
+            -c:a aac -b:a 192k -ar 48000 -ac 2 \
+            -movflags +faststart \
+            "$out" </dev/null >>"$errfile" 2>&1
+        fi
+      else
         ffmpeg -nostdin -hide_banner -y -i "$f" \
           -map 0:v:0 -map 0:a:0? \
           -c:v libx264 -preset veryfast -crf 18 \
@@ -201,13 +232,6 @@ convert_one() {
           -movflags +faststart \
           "$out" </dev/null >>"$errfile" 2>&1
       fi
-    else
-      ffmpeg -nostdin -hide_banner -y -i "$f" \
-        -map 0:v:0 -map 0:a:0? \
-        -c:v libx264 -preset veryfast -crf 18 \
-        -c:a aac -b:a 192k -ar 48000 -ac 2 \
-        -movflags +faststart \
-        "$out" </dev/null >>"$errfile" 2>&1
     fi
   fi
 
@@ -239,35 +263,63 @@ if [[ -n "$input_file" ]]; then
   done < <(printf '%s\0' "$input_file")
 else
   # Directory (top-level only when -R)
-  if [[ "$recursive" == "1" ]]; then
-    while IFS= read -r -d '' f; do
-      [[ -z "$f" ]] && continue
-      convert_one "$f"
-    done < <(find "$src_base" -type f -name "*.mov" -print0)
+  if [[ "$audio_only" -eq 1 ]]; then
+    # Audio mode: .mov and .mp4
+    if [[ "$recursive" == "1" ]]; then
+      while IFS= read -r -d '' f; do
+        [[ -z "$f" ]] && continue
+        convert_one "$f"
+      done < <(find "$src_base" -type f \( -name "*.mov" -o -name "*.mp4" \) -print0)
+    else
+      while IFS= read -r -d '' f; do
+        [[ -z "$f" ]] && continue
+        convert_one "$f"
+      done < <(find "$src_base" -maxdepth 1 -type f \( -name "*.mov" -o -name "*.mp4" \) -print0)
+    fi
   else
-    while IFS= read -r -d '' f; do
-      [[ -z "$f" ]] && continue
-      convert_one "$f"
-    done < <(find "$src_base" -maxdepth 1 -type f -name "*.mov" -print0)
+    # Video mode: .mov only
+    if [[ "$recursive" == "1" ]]; then
+      while IFS= read -r -d '' f; do
+        [[ -z "$f" ]] && continue
+        convert_one "$f"
+      done < <(find "$src_base" -type f -name "*.mov" -print0)
+    else
+      while IFS= read -r -d '' f; do
+        [[ -z "$f" ]] && continue
+        convert_one "$f"
+      done < <(find "$src_base" -maxdepth 1 -type f -name "*.mov" -print0)
+    fi
   fi
 fi
 
-# Output list (enumerate mp4 files, convert back to mov names)
-find "$dst" -type f -name "*.mp4" -print0 \
-| tr '\0' '\n' \
-| sed "s|^$dst/||" \
-| sed 's|\.mp4$|.mov|' \
-| sort > "$outputs_txt"
-
-# Input list (normalize to relative path, .mov format, sort for comparison with outputs_txt)
-sed "s|^$src_base/||" "$inputs_txt" | sed 's|\.[^./]*$|.mov|' | sort > "$inputs_txt.sorted"
+# Output list (enumerate output files, normalize for comparison)
+if [[ "$audio_only" -eq 1 ]]; then
+  find "$dst" -type f -name "*.mp3" -print0 \
+  | tr '\0' '\n' \
+  | sed "s|^$dst/||" \
+  | sort > "$outputs_txt"
+  # Input list: normalize to relative path, .mp3 format (expected output name)
+  sed "s|^$src_base/||" "$inputs_txt" | sed 's|\.[^./]*$|.mp3|' | sort > "$inputs_txt.sorted"
+else
+  find "$dst" -type f -name "*.mp4" -print0 \
+  | tr '\0' '\n' \
+  | sed "s|^$dst/||" \
+  | sed 's|\.mp4$|.mov|' \
+  | sort > "$outputs_txt"
+  # Input list: normalize to relative path, .mov format
+  sed "s|^$src_base/||" "$inputs_txt" | sed 's|\.[^./]*$|.mov|' | sort > "$inputs_txt.sorted"
+fi
 mv "$inputs_txt.sorted" "$inputs_txt"
 
-# Not converted (mov in input but not in output)
+# Not converted (input but not in output)
 comm -23 "$inputs_txt" "$outputs_txt" > "$not_converted_txt" || true
 
 {
-  echo "MODE: $mode"
+  if [[ "$audio_only" -eq 1 ]]; then
+    echo "MODE: audio (MP3)"
+  else
+    echo "MODE: $mode"
+  fi
   echo "SRC : $src_base"
   echo "DST : $dst"
   echo "TOTAL  : $total"

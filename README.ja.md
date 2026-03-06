@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-動画ファイル（.mov）を MP4 に変換するシェルスクリプト。Vrew 用の safe モードと、高速な fast モードを用意。
+動画ファイル（.mov、.mp4）を MP4 に変換したり、音声を MP3 に抽出するシェルスクリプト。Vrew 用の safe モードと、高速な fast モードを用意。
 
 ## 前提条件
 
@@ -28,6 +28,7 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 
 ```bash
 docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 -m fast /input /output
+docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp4 -a /input /output
 ```
 
 ## 使い方
@@ -40,6 +41,7 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 
 | オプション | 説明 |
 |-----------|------|
+| `-a`, `--audio-only` | 音声を MP3 に抽出（.mov/.mp4 から） |
 | `-m`, `--mode MODE` | 変換モード: `fast` \| `safe`（デフォルト: safe） |
 | `-r`, `--recursive` | ディレクトリ内を再帰検索（デフォルト） |
 | `-R`, `--no-recursive` | トップ階層のみ検索 |
@@ -48,8 +50,10 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 
 ### 変換モード
 
-- **safe**: CFR 30fps + yuv420p + H.264 High/4.0 + AAC（Vrew 向け）
-- **fast**: 可能なら映像コピー、音声のみ AAC エンコード。コピー失敗時は再エンコード
+- **video**（デフォルト）: .mov を MP4 に変換
+  - **safe**: CFR 30fps + yuv420p + H.264 High/4.0 + AAC（Vrew 向け）
+  - **fast**: 可能なら映像コピー、音声のみ AAC エンコード。コピー失敗時は再エンコード
+- **audio**（`-a`）: .mov または .mp4 から音声を MP3 に抽出（192k、48kHz、ステレオ）
 
 ### 使用例
 
@@ -57,6 +61,14 @@ docker run --rm -it -v "$(pwd)/videos:/input" -v "$(pwd)/outputs:/output" mov2mp
 
 ```bash
 ./mov2mp4 video.mov
+```
+
+動画から MP3 を抽出:
+
+```bash
+./mov2mp4 -a video.mp4
+./mov2mp4 -a video.mov
+./mov2mp4 -a ./videos
 ```
 
 ディレクトリを変換（再帰検索）:
@@ -95,15 +107,18 @@ fast モードで変換:
 
 ### テストの実行
 
-ディレクトリ変換（再帰、出力は outputs/）:
+自動テストスクリプト（動画変換 + MP3 抽出）:
+
+```bash
+./tests/run-tests.sh
+./tests/run-tests.sh --docker
+```
+
+手動テスト:
 
 ```bash
 ./mov2mp4 tests/data
-```
-
-トップ階層のみ:
-
-```bash
+./mov2mp4 -a tests/data
 ./mov2mp4 -R tests/data
 ```
 
@@ -111,12 +126,14 @@ Docker でテスト:
 
 ```bash
 docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mov2mp4 /input /output
+docker run --rm -it -v "$(pwd)/tests/data:/input" -v "$(pwd)/outputs:/output" mov2mp4 -a /input /output
 ```
 
 単一ファイル:
 
 ```bash
 ./mov2mp4 tests/data/sample1.mov
+./mov2mp4 -a tests/data/sample1.mov
 ```
 
 ### テストデータの再作成
