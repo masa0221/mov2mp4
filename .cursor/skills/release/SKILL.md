@@ -17,15 +17,17 @@ When the user wants to release a new version, do the following.
 
 ## Release flow
 
-### 1. Create tag
+### 1. Create tag and Release
 
 ```bash
 git checkout main && git pull
 git tag v0.1.1
 git push origin v0.1.1
+gh release create v0.1.1 --generate-notes
 ```
 
 - Determine version (e.g. v0.1.0 → v0.1.1). Ask user if unclear.
+- `--generate-notes` creates release notes from merged PRs.
 
 ### 2. Create Homebrew tap PR (gh + curl only)
 
@@ -59,7 +61,7 @@ gh pr create --title "mov2mp4 ${V}" --body "Bump mov2mp4 to ${V}"
 
 | Step | Frequency |
 |------|-----------|
-| Tag create + push | Each release |
+| Tag + push + gh release create | Each release |
 | Homebrew PR (gh + curl) | Each release |
 | Wait for CI | Each release |
 | pr-pull label | Each release |
