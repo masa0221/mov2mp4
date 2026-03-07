@@ -5,7 +5,13 @@ description: Create release (tag + Homebrew tap). Use when user says "release", 
 
 # Release mov2mp4
 
-When the user wants to release a new version (after merge), do the following.
+When the user wants to release a new version, do the following.
+
+**Upstream**: Run earlier steps first if needed:
+
+- Uncommitted changes or no open PR → run `pr` skill, then continue
+- Open PR not merged → run `merge` skill (wait for CI, merge), then continue
+- Only then run the release flow below.
 
 **Related repo**: [masa0221/homebrew-tap](https://github.com/masa0221/homebrew-tap)
 
