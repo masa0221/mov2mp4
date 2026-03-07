@@ -7,11 +7,14 @@ description: Merge current PR and sync local main. Use when user says "merge", "
 
 When the user wants to merge the current PR, do the following:
 
+**Upstream**: If there are uncommitted changes or no open PR yet, run the `pr` skill first, then continue.
+
 1. **Check branch**: Ensure you're on the feature branch with an open PR (or specify PR number)
-2. **Merge**: `gh pr merge --squash --delete-branch` (squash merge, delete remote branch after merge)
+2. **Wait for CI**: Ensure mov2mp4 repo CI has passed on the PR. Do not merge until green.
+3. **Merge**: `gh pr merge --squash --delete-branch` (squash merge, delete remote branch after merge)
    - Or `gh pr merge <PR#> --squash --delete-branch` if merging a specific PR
-3. **Sync local**: `git checkout main && git pull`
-4. **Cleanup**: `git branch -d <feature-branch>` (delete local branch if it exists)
+4. **Sync local**: `git checkout main && git pull`
+5. **Cleanup**: `git branch -d <feature-branch>` (delete local branch if it exists)
 
 If the user prefers merge commit over squash, use `--merge` instead of `--squash`.
 
