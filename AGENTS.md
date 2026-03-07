@@ -58,8 +58,9 @@ Use skill `release` or say "/release" / "リリース" / "タグ打って" to cr
 
 This repo is distributed via [masa0221/homebrew-tap](https://github.com/masa0221/homebrew-tap).
 
-1. Create version tag and push (e.g. v0.1.1)
-2. Run `brew tap masa0221/tap` → `brew bump-formula-pr masa0221/tap mov2mp4`
+1. Create tag: `git tag v0.1.1` → `git push origin v0.1.1`
+2. `brew tap masa0221/tap` → `brew bump-formula-pr --no-fork masa0221/tap mov2mp4`
 3. Wait for PR CI to pass
-4. Add `pr-pull` label to PR (tap bottle gets merged)
-5. Done. `brew install masa0221/tap/mov2mp4` becomes available
+4. Add `pr-pull` label to PR
+
+**One-time setup**: Tap SSH + `git fetch origin` in tap dir.
