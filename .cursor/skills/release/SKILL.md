@@ -15,14 +15,6 @@ When the user wants to release a new version, do the following.
 
 **Related repo**: [masa0221/homebrew-tap](https://github.com/masa0221/homebrew-tap)
 
-## Prerequisites (one-time)
-
-```bash
-cd $(brew --repository masa0221/tap)
-git remote set-url origin git@github.com:masa0221/homebrew-tap.git
-git fetch origin
-```
-
 ## Release flow
 
 ### 1. Create tag
@@ -35,11 +27,22 @@ git push origin v0.1.1
 
 - Determine version (e.g. v0.1.0 → v0.1.1). Ask user if unclear.
 
-### 2. Create Homebrew tap PR
+### 2. Create Homebrew tap PR (gh + curl only)
+
+Use gh and curl. Do not use brew bump-formula-pr (requires `HOMEBREW_GITHUB_API_TOKEN`).
 
 ```bash
-brew tap masa0221/tap
-brew bump-formula-pr --no-fork masa0221/tap mov2mp4
+V=v0.1.1
+curl -sL "https://github.com/masa0221/mov2mp4/archive/refs/tags/${V}.tar.gz" -o /tmp/mov2mp4.tar.gz
+SHA=$(shasum -a 256 /tmp/mov2mp4.tar.gz | cut -d' ' -f1)
+gh repo clone masa0221/homebrew-tap /tmp/homebrew-tap
+cd /tmp/homebrew-tap && git checkout -b mov2mp4-${V#v}
+sed -i.bak "s|/v[0-9.]*\\.tar\\.gz|/${V}.tar.gz|" Formula/mov2mp4.rb
+sed -i.bak "s|sha256 \"[^\"]*\"|sha256 \"${SHA}\"|" Formula/mov2mp4.rb
+rm -f Formula/mov2mp4.rb.bak
+git add Formula/mov2mp4.rb && git commit -m "mov2mp4 ${V}"
+git push -u origin mov2mp4-${V#v}
+gh pr create --title "mov2mp4 ${V}" --body "Bump mov2mp4 to ${V}"
 ```
 
 ### 3. Wait for CI
@@ -57,8 +60,6 @@ brew bump-formula-pr --no-fork masa0221/tap mov2mp4
 | Step | Frequency |
 |------|-----------|
 | Tag create + push | Each release |
-| brew bump-formula-pr | Each release |
+| Homebrew PR (gh + curl) | Each release |
 | Wait for CI | Each release |
 | pr-pull label | Each release |
-
-No extra tools or PAT. These 4 steps only.
